@@ -1,5 +1,6 @@
 # 把整頁截圖裁成只有 Scratch 編輯器 iframe 的 16:9 畫面。
-# iframe 在頁面座標 (0, 46.25) 起 1680x945，DPR=2。
+# 實際尺寸以 course.json 的 capture.box 為準（CodeBrainy 是 (0,46) 起 1248x702、DPR=2）。
+# 怎麼把畫面調到那個尺寸見 .claude/skills/teaching-video-pipeline/references/codebrainy-capture.md
 import os
 import sys
 

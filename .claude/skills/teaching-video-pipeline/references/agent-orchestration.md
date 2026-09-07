@@ -86,18 +86,15 @@ python3 crop-step.py <png> <名稱>.jpg   → 裁成 1620×911 存進 assets/ste
 > 請使用者先登入好，登入後 Agent 才接手操作。示範帳號是 `test-student-01`，
 > **不要用真人學生帳號**——畫面上會拍到姓名與等級。
 
-### CodeBrainy 系統的實拍要點（2A4 實測）
+### CodeBrainy 系統的實拍要點
 
-`https://exam.codepro123.online/playground/practice/`，編輯器是 **TurboWarp**，
-放在**同源 iframe** `#pg-scratch-iframe` 裡，`contentWindow` 上直接有 `vm`、`ScratchBlocks`。
+**完整操作步驟見 [codebrainy-capture.md](codebrainy-capture.md)** — 網址、iframe 結構、
+16:9 尺寸、疊積木的 API 寫法、裁切與命名慣例都在那份，換一台電腦照著跑就行。
 
-- **要 16:9 只能改寬度**：編輯器高度被外層 `.content-wrapper`（`overflow:hidden`）鎖死在 **702px**，
-  把 iframe 或視窗調高都沒用（DOM 會回報新高度，但畫面只畫 702px，下面整片黑）。
-  `iframe.style.width = '1248px'` → 1248×702 剛好 16:9。裁切框 `(0, 46, 1248, 702)` CSS px、DPR 2。
-- **積木不要用滑鼠拖**：Blockly 吃不到合成事件（分類選單、flyout 按鈕都點不動）。
-  改用 API：`ScratchBlocks.getMainWorkspace().getToolbox().setSelectedCategoryById('variables')`、
-  `ws.getButtonCallback('CREATE_VARIABLE')(...)`、`SB.Xml.domToWorkspace()` 逐層疊出程式，
-  每疊一層拍一張，就是完整的「照著排」過程，而且每一張都可重現。
+這裡只留編排上要知道的兩件事：
+
+- 高度鎖死在 702px，**只能改寬度**（`iframe.style.width = '1248px'`）
+- 積木**不能用滑鼠拖**，Blockly 吃不到合成事件，要走 `ScratchBlocks` API
 
 ### 一定要等講稿定稿才開拍
 

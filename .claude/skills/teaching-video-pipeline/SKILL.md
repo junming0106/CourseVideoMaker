@@ -13,6 +13,7 @@ description: 將國小教案投影片轉化為 1~6 年級教學動畫短片的�
 |---|---|
 | [`references/teaching-rhythm.md`](references/teaching-rhythm.md) | **寫講稿前** — 課程骨架、段落切分、概念→實作交錯、等待學生的秒數、提問四拍法則 |
 | [`references/agent-orchestration.md`](references/agent-orchestration.md) | **開工前** — 哪些開 Agent、哪些用腳本、兩個閘門的判定與重試上限 |
+| [`references/codebrainy-capture.md`](references/codebrainy-capture.md) | **實機補素材前** — CodeBrainy 練習場的網址、16:9 尺寸、疊積木 API、裁切與命名 |
 | `lessons/PIPELINE.md` | 執行時 — 各階段的實際指令與踩過的坑 |
 
 ## 整體流程

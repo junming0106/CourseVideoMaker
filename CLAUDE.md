@@ -7,8 +7,9 @@
 1. `.claude/skills/teaching-video-pipeline/SKILL.md` — 主規則（年級分級、角色、版面、配音）
 2. `.claude/skills/teaching-video-pipeline/references/teaching-rhythm.md` — **寫講稿前**：段落切分、提問四拍法則
 3. `.claude/skills/teaching-video-pipeline/references/agent-orchestration.md` — **開工前**：哪些開 Agent、閘門怎麼判
-4. `PIPELINE.md` — 執行時：各階段指令與踩過的坑
-5. `tools/README.md` — 每支腳本能不能單獨用、吃什麼吐什麼
+4. `.claude/skills/teaching-video-pipeline/references/codebrainy-capture.md` — **要實機截圖補素材時**：CodeBrainy 練習場操作 runbook
+5. `PIPELINE.md` — 執行時：各階段指令與踩過的坑
+6. `tools/README.md` — 每支腳本能不能單獨用、吃什麼吐什麼
 
 ## 不能違反的三件事
 
