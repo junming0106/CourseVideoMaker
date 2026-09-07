@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- 明亮教室風統一教學背景：中央綠板留白供積木/對話框疊加 -->
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE9A8"/>
+      <stop offset="1" stop-color="#FFD166"/>
+    </linearGradient>
+    <linearGradient id="board" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2FA36B"/>
+      <stop offset="1" stop-color="#1E7A4F"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 牆面 -->
+  <rect width="1920" height="1080" fill="url(#wall)"/>
+
+  <!-- 牆面裝飾圓點與幾何 -->
+  <circle cx="120" cy="130" r="26" fill="#FF6B6B" opacity="0.85"/>
+  <circle cx="1830" cy="180" r="20" fill="#4ECDC4" opacity="0.85"/>
+  <circle cx="240" cy="960" r="18" fill="#5B8DEF" opacity="0.8"/>
+  <circle cx="1700" cy="980" r="24" fill="#FF9F43" opacity="0.85"/>
+  <rect x="1770" y="70" width="36" height="36" rx="9" fill="#FF6B6B" opacity="0.7" transform="rotate(18 1788 88)"/>
+  <rect x="90" y="880" width="30" height="30" rx="8" fill="#4ECDC4" opacity="0.7" transform="rotate(-14 105 895)"/>
+  <path d="M 1650 60 l 14 28 30 4 -22 21 5 30 -27 -14 -27 14 5 -30 -22 -21 30 -4 z" fill="#FFB703" opacity="0.9"/>
+  <path d="M 200 700 l 11 22 24 3 -17 17 4 24 -22 -11 -22 11 4 -24 -17 -17 24 -3 z" fill="#FF6B6B" opacity="0.75"/>
+  <path d="M 60 420 q 20 -34 40 0" stroke="#5B8DEF" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M 1820 620 q 20 -34 40 0" stroke="#FF9F43" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- 彩色三角旗串 -->
+  <path d="M 0 30 Q 480 90 960 55 Q 1440 20 1920 70" stroke="#8D6E63" stroke-width="6" fill="none"/>
+  <g>
+    <path d="M 180 52 l 30 66 -62 4 z" fill="#FF6B6B"/>
+    <path d="M 420 72 l 30 66 -62 4 z" fill="#4ECDC4"/>
+    <path d="M 660 70 l 30 66 -62 4 z" fill="#FFB703"/>
+    <path d="M 900 58 l 30 66 -62 4 z" fill="#5B8DEF"/>
+    <path d="M 1140 45 l 30 66 -62 4 z" fill="#FF9F43"/>
+    <path d="M 1380 38 l 30 66 -62 4 z" fill="#EF6AA8"/>
+    <path d="M 1620 45 l 30 66 -62 4 z" fill="#4ECDC4"/>
+  </g>
+
+  <!-- 中央綠板（乾淨留白區） -->
+  <g>
+    <rect x="210" y="170" width="1500" height="760" rx="38" fill="#C68B4E"/>
+    <rect x="238" y="196" width="1444" height="708" rx="26" fill="url(#board)"/>
+    <!-- 板面柔光 -->
+    <path d="M 260 220 Q 700 190 1660 240 L 1660 320 Q 900 260 260 300 Z" fill="#FFFFFF" opacity="0.06"/>
+    <!-- 板下粉筆槽與粉筆 -->
+    <rect x="700" y="930" width="520" height="26" rx="13" fill="#A9713B"/>
+    <rect x="760" y="922" width="70" height="12" rx="6" fill="#FF6B6B"/>
+    <rect x="860" y="922" width="70" height="12" rx="6" fill="#FFFFFF"/>
+    <rect x="960" y="922" width="70" height="12" rx="6" fill="#4ECDC4"/>
+  </g>
+
+  <!-- 板角小裝飾（不佔中央） -->
+  <path d="M 300 250 l 9 18 20 3 -14 14 3 20 -18 -9 -18 9 3 -20 -14 -14 20 -3 z" fill="#FFE066" opacity="0.9"/>
+  <path d="M 1600 840 l 9 18 20 3 -14 14 3 20 -18 -9 -18 9 3 -20 -14 -14 20 -3 z" fill="#FFE066" opacity="0.9"/>
+  <path d="M 1580 260 q 14 -24 28 0" stroke="#FFFFFF" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.55"/>
+  <path d="M 320 850 q 14 -24 28 0" stroke="#FFFFFF" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.55"/>
+</svg>

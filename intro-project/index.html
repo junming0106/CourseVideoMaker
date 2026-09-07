@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg: #3d3654;
+        --bg2: #2e2842;
+        --yellow: #f0b429;
+        --red: #f43f5e;
+        --blue: #4cc3ea;
+        --green: #34d399;
+        --purple: #7c3aed;
+        --white: #ffffff;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      /* 背景：微弱斜紋 + 打亮中心，仿參考影片的質感 */
+      #bg {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, 0.05), transparent 62%),
+          repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.016) 0 3px, transparent 3px 26px),
+          var(--bg);
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+      }
+      .abs {
+        position: absolute;
+      }
+
+      /* ── Phase A：圖形飛舞 ── */
+      #logo-mark {
+        left: 722px;
+        top: 286px;
+        width: 476px;
+        filter: drop-shadow(14px 18px 0 rgba(0, 0, 0, 0.18));
+      }
+      #arcs {
+        left: 580px;
+        top: 90px;
+      }
+      .block-img {
+        filter: drop-shadow(8px 10px 0 rgba(0, 0, 0, 0.16));
+      }
+      .tri {
+        width: 0;
+        height: 0;
+      }
+      .sparkle {
+        width: 18px;
+        height: 18px;
+      }
+      .sparkle::before,
+      .sparkle::after {
+        content: "";
+        position: absolute;
+        background: var(--white);
+        border-radius: 4px;
+      }
+      .sparkle::before {
+        left: 7px;
+        top: 0;
+        width: 4px;
+        height: 18px;
+      }
+      .sparkle::after {
+        left: 0;
+        top: 7px;
+        width: 18px;
+        height: 4px;
+      }
+      .char {
+        position: absolute;
+      }
+      .char img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28));
+      }
+
+      /* ── Phase B：斜切色塊 ── */
+      .panel {
+        position: absolute;
+        left: -1140px;
+        top: -260px;
+        width: 4200px;
+        height: 1600px;
+        transform: rotate(18deg);
+      }
+      #panel-yellow {
+        background: var(--yellow);
+      }
+      #panel-green {
+        background: var(--green);
+      }
+
+      /* ── Phase C：Logo 定版 ── */
+      #logo-wrap {
+        left: 440px;
+        top: 268px;
+        width: 1040px;
+      }
+      #logo-wrap img {
+        width: 100%;
+        display: block;
+      }
+      #underline-hatch {
+        left: 700px;
+        top: 648px;
+        width: 520px;
+        height: 24px;
+        transform: skewX(-18deg);
+        background: repeating-linear-gradient(115deg, var(--yellow) 0 14px, transparent 14px 23px);
+        transform-origin: left center;
+      }
+      #underline-dash {
+        left: 552px;
+        top: 674px;
+        width: 118px;
+        height: 15px;
+        border-radius: 8px;
+        background: var(--blue);
+      }
+      .tick {
+        border-radius: 4px;
+      }
+      #tick-red {
+        left: 1246px;
+        top: 630px;
+        width: 9px;
+        height: 48px;
+        background: var(--red);
+        transform: rotate(22deg);
+      }
+      #tick-blue {
+        left: 1276px;
+        top: 642px;
+        width: 7px;
+        height: 34px;
+        background: var(--blue);
+        transform: rotate(22deg);
+      }
+      .confetti {
+        left: 952px;
+        top: 432px;
+        width: 16px;
+        height: 16px;
+      }
+      .confetti.round {
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="10"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="bg"></div>
+
+      <!-- ═══ 音訊 ═══ -->
+      <audio id="bgm" class="clip" data-start="0" data-duration="10" data-track-index="0" data-volume="0.85" src="assets/bgm/intro-bgm.m4a"></audio>
+      <!-- pop 音效軌 -->
+      <audio id="sfx-01" class="clip" data-start="0.15" data-duration="0.16" data-track-index="4" data-volume="0.8" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-02" class="clip" data-start="0.85" data-duration="0.16" data-track-index="4" data-volume="0.7" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-03" class="clip" data-start="1.25" data-duration="0.16" data-track-index="4" data-volume="0.7" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-04" class="clip" data-start="1.85" data-duration="0.16" data-track-index="4" data-volume="0.7" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-05" class="clip" data-start="2.2" data-duration="0.16" data-track-index="4" data-volume="0.85" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-06" class="clip" data-start="2.4" data-duration="0.16" data-track-index="4" data-volume="0.85" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-07" class="clip" data-start="2.6" data-duration="0.16" data-track-index="4" data-volume="0.85" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-08" class="clip" data-start="6.7" data-duration="0.16" data-track-index="4" data-volume="0.8" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-09" class="clip" data-start="6.88" data-duration="0.16" data-track-index="4" data-volume="0.8" src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-10" class="clip" data-start="7.06" data-duration="0.16" data-track-index="4" data-volume="0.8" src="assets/sfx/pop.wav"></audio>
+      <!-- 重點音效軌 -->
+      <audio id="sfx-11" class="clip" data-start="0.6" data-duration="0.1" data-track-index="5" data-volume="0.5" src="assets/sfx/tick.wav"></audio>
+      <audio id="sfx-12" class="clip" data-start="1.0" data-duration="0.1" data-track-index="5" data-volume="0.5" src="assets/sfx/tick.wav"></audio>
+      <audio id="sfx-13" class="clip" data-start="1.15" data-duration="0.1" data-track-index="5" data-volume="0.5" src="assets/sfx/tick.wav"></audio>
+      <audio id="sfx-14" class="clip" data-start="4.5" data-duration="0.34" data-track-index="5" data-volume="0.95" src="assets/sfx/swoosh.wav"></audio>
+      <audio id="sfx-15" class="clip" data-start="5.5" data-duration="0.7" data-track-index="5" data-volume="0.95" src="assets/sfx/magic.wav"></audio>
+      <audio id="sfx-16" class="clip" data-start="6.3" data-duration="0.85" data-track-index="5" data-volume="0.85" src="assets/sfx/ding.wav"></audio>
+
+      <!-- ═══ Phase A：圖形 + 積木 + 角色飛舞 (0 – 5.3s) ═══ -->
+      <div id="shape-play" class="clip scene" data-start="0" data-duration="5.3" data-track-index="1">
+        <div id="sp-wrap" class="scene">
+          <img id="logo-mark" class="abs" src="assets/logo/codepro_mark_white.png" alt="CodePro mark" />
+
+          <svg id="arcs" class="abs" width="760" height="760" viewBox="0 0 760 760" fill="none">
+            <path id="arc-red" d="M 579.3 142.5 A 310 310 0 0 1 535 648.5" stroke="#f43f5e" stroke-width="26" stroke-linecap="round" />
+            <path id="arc-orange" d="M 90.2 302.3 A 300 300 0 0 1 327.9 84.6" stroke="#f0b429" stroke-width="20" stroke-linecap="round" />
+            <g id="sun-rays" stroke="#f0b429" stroke-width="9" stroke-linecap="round">
+              <line x1="380" y1="28" x2="380" y2="86" transform="rotate(-55 380 380)" />
+              <line x1="380" y1="40" x2="380" y2="84" transform="rotate(-42 380 380)" />
+              <line x1="380" y1="26" x2="380" y2="88" transform="rotate(-29 380 380)" />
+              <line x1="380" y1="42" x2="380" y2="84" transform="rotate(-16 380 380)" />
+              <line x1="380" y1="30" x2="380" y2="86" transform="rotate(-3 380 380)" />
+            </g>
+          </svg>
+
+          <!-- Scratch 積木 -->
+          <img id="blk-flag" class="abs block-img" src="assets/blocks/event_whenflagclicked.svg" style="left: 260px; top: 190px; width: 300px; transform: rotate(-8deg)" />
+          <img id="blk-move" class="abs block-img" src="assets/blocks/motion_movesteps.svg" style="left: 1400px; top: 240px; width: 300px; transform: rotate(6deg)" />
+          <img id="blk-say" class="abs block-img" src="assets/blocks/looks_say.svg" style="left: 300px; top: 600px; width: 220px; transform: rotate(5deg)" />
+          <img id="blk-repeat" class="abs block-img" src="assets/blocks/control_repeat.svg" style="left: 1460px; top: 610px; width: 260px; transform: rotate(-6deg)" />
+          <img id="blk-add" class="abs block-img" src="assets/blocks/operator_add.svg" style="left: 800px; top: 95px; width: 230px; transform: rotate(-4deg)" />
+          <img id="blk-turn" class="abs block-img" src="assets/blocks/motion_turnright.svg" style="left: 1230px; top: 118px; width: 300px; transform: rotate(7deg)" />
+
+          <!-- 三角形（仿參考的角落幾何） -->
+          <div id="tri-1" class="abs tri" style="left: 90px; top: 350px; border-left: 34px solid transparent; border-right: 34px solid transparent; border-top: 56px solid var(--yellow)"></div>
+          <div id="tri-2" class="abs tri" style="left: 178px; top: 438px; border-left: 24px solid transparent; border-right: 24px solid transparent; border-top: 40px solid #2dd4bf"></div>
+          <div id="tri-3" class="abs tri" style="left: 104px; top: 512px; border-left: 30px solid transparent; border-right: 30px solid transparent; border-top: 48px solid var(--red)"></div>
+
+          <!-- 星星閃光 -->
+          <div class="abs sparkle" id="sk-1" style="left: 1700px; top: 180px"></div>
+          <div class="abs sparkle" id="sk-2" style="left: 1760px; top: 520px; transform: scale(0.7)"></div>
+          <div class="abs sparkle" id="sk-3" style="left: 180px; top: 150px"></div>
+          <div class="abs sparkle" id="sk-4" style="left: 640px; top: 860px; transform: scale(0.8)"></div>
+          <div class="abs sparkle" id="sk-5" style="left: 1350px; top: 82px; transform: scale(0.6)"></div>
+
+          <!-- 吉祥物（4 幀揮手循環） -->
+          <div class="char" id="cA-cooper" style="left: 60px; top: 660px; width: 380px; height: 380px">
+            <img id="cA-cooper-f0" src="assets/characters/Cooper/keyframe_01.png" />
+            <img id="cA-cooper-f1" src="assets/characters/Cooper/keyframe_02.png" style="opacity: 0" />
+            <img id="cA-cooper-f2" src="assets/characters/Cooper/keyframe_03.png" style="opacity: 0" />
+            <img id="cA-cooper-f3" src="assets/characters/Cooper/keyframe_04.png" style="opacity: 0" />
+          </div>
+          <div class="char" id="cA-max" style="left: 790px; top: 690px; width: 380px; height: 380px">
+            <img id="cA-max-f0" src="assets/characters/Max/keyframe_01.png" />
+            <img id="cA-max-f1" src="assets/characters/Max/keyframe_02.png" style="opacity: 0" />
+            <img id="cA-max-f2" src="assets/characters/Max/keyframe_03.png" style="opacity: 0" />
+            <img id="cA-max-f3" src="assets/characters/Max/keyframe_04.png" style="opacity: 0" />
+          </div>
+          <div class="char" id="cA-cora" style="left: 1480px; top: 660px; width: 380px; height: 380px">
+            <img id="cA-cora-f0" src="assets/characters/Cora/keyframe_01.png" />
+            <img id="cA-cora-f1" src="assets/characters/Cora/keyframe_02.png" style="opacity: 0" />
+            <img id="cA-cora-f2" src="assets/characters/Cora/keyframe_03.png" style="opacity: 0" />
+            <img id="cA-cora-f3" src="assets/characters/Cora/keyframe_04.png" style="opacity: 0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Phase C：Logo 定版 (5.0 – 10s，先藏在色塊後) ═══ -->
+      <div id="logo-scene" class="clip scene" data-start="5.0" data-duration="5.0" data-track-index="2">
+        <!-- 彩帶（噴發用） -->
+        <div class="abs confetti" id="cf-0" style="background: var(--yellow)"></div>
+        <div class="abs confetti round" id="cf-1" style="background: var(--red)"></div>
+        <div class="abs confetti" id="cf-2" style="background: var(--blue)"></div>
+        <div class="abs confetti round" id="cf-3" style="background: var(--green)"></div>
+        <div class="abs confetti" id="cf-4" style="background: var(--purple)"></div>
+        <div class="abs confetti round" id="cf-5" style="background: var(--yellow)"></div>
+        <div class="abs confetti" id="cf-6" style="background: var(--red)"></div>
+        <div class="abs confetti round" id="cf-7" style="background: var(--blue)"></div>
+        <div class="abs confetti" id="cf-8" style="background: var(--green)"></div>
+        <div class="abs confetti round" id="cf-9" style="background: var(--purple)"></div>
+        <div class="abs confetti" id="cf-10" style="background: var(--yellow)"></div>
+        <div class="abs confetti round" id="cf-11" style="background: var(--red)"></div>
+        <div class="abs confetti" id="cf-12" style="background: var(--blue)"></div>
+        <div class="abs confetti round" id="cf-13" style="background: var(--green)"></div>
+        <div class="abs confetti" id="cf-14" style="background: var(--white)"></div>
+        <div class="abs confetti round" id="cf-15" style="background: var(--white)"></div>
+
+        <div id="logo-wrap" class="abs">
+          <img src="assets/logo/codepro_logo_white.webp" alt="CodePro" />
+        </div>
+        <div id="underline-hatch" class="abs"></div>
+        <div id="underline-dash" class="abs"></div>
+        <div id="tick-red" class="abs tick"></div>
+        <div id="tick-blue" class="abs tick"></div>
+
+        <!-- 結尾吉祥物三人組 -->
+        <div class="char" id="cC-cooper" style="left: 640px; top: 782px; width: 250px; height: 250px">
+          <img id="cC-cooper-f0" src="assets/characters/Cooper/keyframe_01.png" />
+          <img id="cC-cooper-f1" src="assets/characters/Cooper/keyframe_02.png" style="opacity: 0" />
+          <img id="cC-cooper-f2" src="assets/characters/Cooper/keyframe_03.png" style="opacity: 0" />
+          <img id="cC-cooper-f3" src="assets/characters/Cooper/keyframe_04.png" style="opacity: 0" />
+        </div>
+        <div class="char" id="cC-max" style="left: 835px; top: 770px; width: 250px; height: 250px">
+          <img id="cC-max-f0" src="assets/characters/Max/keyframe_01.png" />
+          <img id="cC-max-f1" src="assets/characters/Max/keyframe_02.png" style="opacity: 0" />
+          <img id="cC-max-f2" src="assets/characters/Max/keyframe_03.png" style="opacity: 0" />
+          <img id="cC-max-f3" src="assets/characters/Max/keyframe_04.png" style="opacity: 0" />
+        </div>
+        <div class="char" id="cC-cora" style="left: 1030px; top: 782px; width: 250px; height: 250px">
+          <img id="cC-cora-f0" src="assets/characters/Cora/keyframe_01.png" />
+          <img id="cC-cora-f1" src="assets/characters/Cora/keyframe_02.png" style="opacity: 0" />
+          <img id="cC-cora-f2" src="assets/characters/Cora/keyframe_03.png" style="opacity: 0" />
+          <img id="cC-cora-f3" src="assets/characters/Cora/keyframe_04.png" style="opacity: 0" />
+        </div>
+      </div>
+
+      <!-- ═══ Phase B：斜切色塊轉場 (4.4 – 6.0s，最上層) ═══ -->
+      <div id="wipe" class="clip scene" data-start="4.4" data-duration="1.6" data-track-index="3">
+        <div id="panel-yellow" class="panel" data-layout-allow-overflow="true"></div>
+        <div id="panel-green" class="panel" data-layout-allow-overflow="true"></div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // 吉祥物揮手：4 幀 ping-pong，每 0.25s 換幀（對應 timing.json 12fps×18 幀節奏）
+      // 用 tl.set 逐格切換 → seek-safe
+      function wave(prefix, t0, t1) {
+        const order = [0, 1, 2, 3, 2, 1];
+        let step = 1; // 進場時已顯示第 0 幀
+        for (let t = t0; t < t1 - 0.01; t += 0.25) {
+          const f = order[step % 6];
+          for (let k = 0; k < 4; k++) {
+            tl.set(`#${prefix}-f${k}`, { autoAlpha: k === f ? 1 : 0 }, t);
+          }
+          step++;
+        }
+      }
+
+      // ═══ Phase A ═══
+      tl.fromTo("#logo-mark", { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.55, ease: "back.out(1.8)" }, 0.15);
+      tl.to("#logo-mark", { rotation: 360, duration: 4.2, ease: "none", transformOrigin: "50% 50%" }, 0.7);
+
+      tl.fromTo("#arc-red", { strokeDasharray: 600, strokeDashoffset: 600, autoAlpha: 0 }, { strokeDashoffset: 0, autoAlpha: 1, duration: 0.6, ease: "power3.out" }, 0.5);
+      tl.fromTo("#arc-orange", { strokeDasharray: 350, strokeDashoffset: -350, autoAlpha: 0 }, { strokeDashoffset: 0, autoAlpha: 1, duration: 0.55, ease: "power3.out" }, 0.6);
+      tl.to("#arcs", { rotation: -14, duration: 3.8, ease: "sine.inOut", transformOrigin: "50% 50%" }, 1.1);
+
+      tl.fromTo("#sun-rays line", { scale: 0, transformOrigin: "380px 380px", autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.35, ease: "back.out(2)", stagger: 0.05 }, 0.55);
+
+      // 積木從兩側甩入 + 漂浮
+      const blocks = [
+        ["#blk-flag", -560, 0.85],
+        ["#blk-move", 560, 1.05],
+        ["#blk-say", -520, 1.25],
+        ["#blk-repeat", 520, 1.45],
+        ["#blk-add", -420, 1.65],
+        ["#blk-turn", 460, 1.85],
+      ];
+      blocks.forEach(([sel, dx, t], i) => {
+        tl.fromTo(sel, { x: dx, autoAlpha: 0, rotation: dx > 0 ? 40 : -40 }, { x: 0, autoAlpha: 1, rotation: 0, duration: 0.65, ease: "back.out(1.4)" }, t);
+        const floatStart = t + 0.7;
+        const reps = Math.max(1, Math.floor((4.55 - floatStart) / 0.55));
+        tl.to(sel, { y: i % 2 ? 12 : -12, duration: 0.55, ease: "sine.inOut", yoyo: true, repeat: reps }, floatStart);
+      });
+
+      // 三角形 cascade
+      [["#tri-1", 1.0], ["#tri-2", 1.15], ["#tri-3", 1.3]].forEach(([sel, t]) => {
+        tl.fromTo(sel, { x: -260, autoAlpha: 0, rotation: -70 }, { x: 0, autoAlpha: 1, rotation: 0, duration: 0.5, ease: "back.out(1.6)" }, t);
+      });
+
+      // 星星閃爍
+      [["#sk-1", 1.5], ["#sk-2", 2.0], ["#sk-3", 2.5], ["#sk-4", 3.0], ["#sk-5", 3.4]].forEach(([sel, t]) => {
+        tl.fromTo(sel, { scale: 0, autoAlpha: 0, rotation: 0 }, { scale: 1.1, autoAlpha: 1, rotation: 90, duration: 0.35, ease: "back.out(2)" }, t);
+        tl.to(sel, { scale: 0, autoAlpha: 0, duration: 0.3, ease: "power2.in" }, t + 0.5);
+      });
+
+      // 吉祥物 bounce 入鏡 + 揮手
+      [["#cA-cooper", 2.2], ["#cA-max", 2.4], ["#cA-cora", 2.6]].forEach(([sel, t]) => {
+        tl.fromTo(sel, { y: 520, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, ease: "back.out(1.3)" }, t);
+      });
+      wave("cA-cooper", 2.9, 5.0);
+      wave("cA-max", 3.1, 5.0);
+      wave("cA-cora", 3.3, 5.0);
+
+      // wipe 前的 anticipation pulse（對齊鼓花）
+      tl.to("#sp-wrap", { scale: 1.045, duration: 0.22, ease: "sine.inOut", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, 4.25);
+
+      // ═══ Phase B：斜切色塊 ═══
+      tl.fromTo("#panel-yellow", { x: -4400 }, { x: 0, duration: 0.5, ease: "power3.in" }, 4.45);
+      tl.to("#panel-yellow", { x: 4400, duration: 0.55, ease: "power3.out" }, 5.05);
+      tl.fromTo("#panel-green", { x: -4400 }, { x: 0, duration: 0.5, ease: "power3.in" }, 4.6);
+      tl.to("#panel-green", { x: 4400, duration: 0.55, ease: "power3.out" }, 5.2);
+
+      // ═══ Phase C：Logo 定版 ═══
+      tl.fromTo("#logo-wrap", { scale: 0.3, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.7, ease: "back.out(1.6)" }, 5.55);
+      tl.fromTo(
+        "#logo-wrap img",
+        { filter: "drop-shadow(0 0 0px rgba(255,255,255,0))" },
+        { filter: "drop-shadow(0 0 42px rgba(255,255,255,0.65))", duration: 0.5, ease: "power2.out" },
+        5.6
+      );
+      tl.to("#logo-wrap img", { filter: "drop-shadow(0 0 14px rgba(255,255,255,0.35))", duration: 0.8, ease: "sine.out" }, 6.4);
+
+      // 彩帶噴發（決定性：以索引推算方向，無亂數）
+      for (let i = 0; i < 16; i++) {
+        const ang = (i / 16) * Math.PI * 2 + 0.35;
+        const dist = 380 + (i % 4) * 110;
+        tl.fromTo(
+          `#cf-${i}`,
+          { x: 0, y: 0, scale: 0.4, autoAlpha: 1, rotation: 0 },
+          {
+            x: Math.cos(ang) * dist,
+            y: Math.sin(ang) * dist * 0.72 + 60,
+            scale: 1,
+            rotation: i % 2 ? 320 : -280,
+            autoAlpha: 0,
+            duration: 1.3,
+            ease: "power2.out",
+          },
+          5.62 + (i % 3) * 0.05
+        );
+      }
+
+      // 底線：黃色斜紋 sweep + 藍色短劃 + 彩色小斜線
+      tl.fromTo("#underline-hatch", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, 6.3);
+      tl.fromTo("#underline-dash", { x: -90, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.4, ease: "power3.out" }, 6.42);
+      tl.fromTo("#tick-red", { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(2.4)", transformOrigin: "50% 100%" }, 6.62);
+      tl.fromTo("#tick-blue", { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(2.4)", transformOrigin: "50% 100%" }, 6.72);
+
+      // 結尾三人組 pop + 揮手
+      [["#cC-cooper", 6.7], ["#cC-max", 6.88], ["#cC-cora", 7.06]].forEach(([sel, t]) => {
+        tl.fromTo(sel, { y: 340, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.55, ease: "back.out(1.5)" }, t);
+      });
+      wave("cC-cooper", 7.45, 9.6);
+      wave("cC-max", 7.6, 9.6);
+      wave("cC-cora", 7.75, 9.6);
+
+      // 定版呼吸（hold_breath）
+      tl.to("#logo-wrap", { scale: 1.014, duration: 0.6, ease: "sine.inOut", yoyo: true, repeat: 1 }, 8.6);
+
+      tl.seek(0);
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

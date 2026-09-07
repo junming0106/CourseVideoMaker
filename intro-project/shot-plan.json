@@ -1,0 +1,75 @@
+{
+  "category": "logo-reveal",
+  "duration_s": 10,
+  "fps": 30,
+  "canvas": { "w": 1920, "h": 1080, "aspect": "16:9" },
+  "style": "兒童動畫片頭：仿參考影片（深紫底 + 高飽和扁平幾何圖形高速飛舞 → 斜向色塊 wipe → 白色 logo 定版），加入 Scratch 積木與 CodePro 吉祥物（Cooper/Cora/Max）當飛舞元素。彈性 ease（back/elastic/bounce）、快節奏、聲光效果十足。受眾國小 1–6 年級。",
+  "palette": ["#3d3654", "#2e2842", "#f0b429", "#f43f5e", "#4cc3ea", "#34d399", "#7c3aed", "#ffffff"],
+  "font": "Baloo 2 / Nunito rounded fallback",
+  "beats": [0.5, 2.0, 3.2, 4.6, 5.6, 7.0],
+  "export": "mp4",
+  "asset_needs": [
+    {
+      "role": "bgm",
+      "kind": "audio",
+      "query": "energetic playful upbeat kids cartoon intro sting",
+      "source": "media-use resolve --type bgm",
+      "treatment": "trim to 10s + fade out"
+    },
+    {
+      "role": "logo",
+      "kind": "logo",
+      "query": "CodePro white horizontal lockup",
+      "source": "local: ../../hyperframes-project/assets/codepro_logo_white.webp",
+      "treatment": "none"
+    },
+    {
+      "role": "scratch-blocks",
+      "kind": "svg",
+      "query": "6 colorful blocks: event_whenflagclicked, motion_movesteps, looks_say, control_repeat, operator_add, sensing_askandwait",
+      "source": "local: ../../hyperframes-project/assets/scratch-blocks/",
+      "treatment": "none"
+    },
+    {
+      "role": "characters",
+      "kind": "image",
+      "query": "Cooper/Cora/Max greeting keyframes (4-frame wave loop, timing.json)",
+      "source": "local: ../../hyperframes-project/assets/characters/",
+      "treatment": "none"
+    },
+    {
+      "role": "sfx",
+      "kind": "audio",
+      "query": "pop, swoosh, magic, ding",
+      "source": "local: ../../hyperframes-project/assets/sfx/",
+      "treatment": "none"
+    }
+  ],
+  "block": null,
+  "customize": {},
+  "content": {
+    "logo": "assets/logo/codepro_logo_white.webp",
+    "tagline": null,
+    "url": null,
+    "phases": [
+      {
+        "id": "shape-play",
+        "start": 0,
+        "end": 4.6,
+        "notes": "中央條紋圓 + 橘弧 + 紅弧（仿參考）彈入旋轉；左下三角瀑布；Scratch 積木從兩側甩入並旋轉飄浮；三隻吉祥物 bounce 入鏡揮手（4 幀 greeting 循環，seek-safe set() 驅動）；星星粒子閃爍。sfx: pop×3、tick。"
+      },
+      {
+        "id": "wipe",
+        "start": 4.6,
+        "end": 5.6,
+        "notes": "黃色斜色塊從左上、綠色斜色塊從右下高速掃過全畫面蓋掉前景，再滑出。sfx: swoosh。"
+      },
+      {
+        "id": "logo-reveal",
+        "start": 5.6,
+        "end": 10,
+        "notes": "白色 CodePro 橫式 lockup scale_punch(back.out) + glow bloom；黃色條紋底線 underline_sweep + 藍色短劃（仿參考 f07）；彩色 confetti burst；三隻吉祥物縮小版在 logo 下方 pop 出揮手；結尾 hold_breath 定版。sfx: magic、ding、pop。"
+      }
+    ]
+  }
+}

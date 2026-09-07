@@ -1,0 +1,9 @@
+{
+  "name": "teaching-video-pipeline",
+  "private": true,
+  "type": "module",
+  "description": "教案 pptx → 國小教學動畫影片的產線",
+  "scripts": {
+    "prep": "node tools/analyze/prep-course.mjs"
+  }
+}

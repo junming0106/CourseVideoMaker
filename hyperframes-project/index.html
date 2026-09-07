@@ -1,0 +1,17 @@
+<!-- 佔位檔。
+     真正的 composition 由各課程的 build-composition.mjs 整份覆寫進來：
+
+       cd lessons/<slug>/scripts
+       node ../../../tools/run-pipeline.mjs --from build --to build
+
+     全產線只有這一份 index.html，它就是 `hyperframes render .` 的入口。
+     run-pipeline 會在第一行蓋上 `<!-- course: <slug> -->`，
+     lint／render／check-frames 都會先驗這個戳記，避免拿到別門課的畫面。 -->
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><title>還沒建立 composition</title></head>
+<body style="font-family:system-ui;padding:40px">
+  <h1>還沒有 composition</h1>
+  <p>到 <code>lessons/&lt;slug&gt;/scripts/</code> 底下跑 <code>run-pipeline.mjs</code>。</p>
+</body>
+</html>

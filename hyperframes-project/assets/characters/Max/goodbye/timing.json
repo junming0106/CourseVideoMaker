@@ -1,0 +1,29 @@
+{
+  "character": "Max",
+  "action": "goodbye",
+  "label_zh_tw": "再見揮手",
+  "fps": 12,
+  "duration_seconds": 1.5,
+  "frame_count": 18,
+  "keyframe_order_zero_based": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    2,
+    2,
+    2,
+    1,
+    1,
+    1
+  ],
+  "loop": true
+}

@@ -1,0 +1,18 @@
+.env
+.DS_Store
+__pycache__/
+node_modules/
+
+# 渲染產物與快取（可重新產生，別進版控）
+hyperframes-project/renders/
+hyperframes-project/.thumbnails/
+hyperframes-project/.transcode-cache/
+hyperframes-project/.waveform-cache/
+hyperframes-project/.frame-check/
+lessons/*/output/*.mp4
+lessons/*/output/frame-check/
+lessons/*/output/verify-frames/
+
+# 語音檔（內容雜湊快取，重跑會依 voice-durations 補回）
+hyperframes-project/assets/*/voice/
+kit-preview.html
