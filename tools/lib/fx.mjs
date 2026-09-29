@@ -148,6 +148,8 @@ export const FX = {
   // 元素裡要有一個 .cdnum 來顯示數字。滴答聲逐秒登記，數完補一聲鈴。
   countdown: { sfx: null, countdown: 5 },
   countdown4: { sfx: null, countdown: 4 },
+  countdown3: { sfx: null, countdown: 3 },
+  countdown2: { sfx: null, countdown: 2 },
 };
 
 /** 可以當進場用的效果名稱 */

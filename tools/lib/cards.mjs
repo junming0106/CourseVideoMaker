@@ -38,7 +38,11 @@ export const FONT_CSS = `
       @font-face { font-family: "Yuanti TC"; src: local("Yuanti TC"); }
       @font-face { font-family: "PingFang TC"; src: local("PingFang TC"); }
       @font-face { font-family: "Noto Sans TC"; src: local("Noto Sans TC"); }
-      body { font-family: "Yuanti TC", "PingFang TC", "Noto Sans TC", sans-serif; font-weight: 800; }
+      @font-face { font-family: "Microsoft JhengHei"; src: local("Microsoft JhengHei"); }
+      /* 前三個是 macOS 的圓體與黑體；Windows 上都不存在，會一路落到 sans-serif，
+         而中文的 sans-serif 在某些設定下會解析成新細明體（明體橫細直粗，1080p 會斷筆畫）。
+         所以把微軟正黑體明確排在通用字族之前。 */
+      body { font-family: "Yuanti TC", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; font-weight: 800; }
 `;
 
 /** 關鍵字強調的預設值。整片想統一調就改這裡，不用每一句傳參數。 */

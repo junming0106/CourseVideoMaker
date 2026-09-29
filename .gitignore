@@ -16,3 +16,22 @@ lessons/*/output/verify-frames/
 # 語音檔（內容雜湊快取，重跑會依 voice-durations 補回）
 hyperframes-project/assets/*/voice/
 kit-preview.html
+
+# 各課程的產出（教案匯入、素材、組裝結果都可以重新產生）
+lessons/*/
+!lessons/_reference-*/
+!lessons/README.md
+!lessons/PIPELINE.md
+hyperframes-project/assets/*/
+!hyperframes-project/assets/characters/
+!hyperframes-project/assets/backgrounds/
+!hyperframes-project/assets/scratch-blocks/
+!hyperframes-project/assets/scratch角色素材/
+!hyperframes-project/assets/scratch背景素材/
+!hyperframes-project/assets/sfx/
+# 背景音樂是逐課挑的素材，不進版控（來源記在 assets/bgm/SOURCES.md）
+hyperframes-project/assets/bgm-music.m4a
+hyperframes-project/assets/bgm/
+hyperframes-project/assets/opening.orig.mp4
+# composition 由各課的 build-composition.mjs 整份覆寫，內容屬於當下那門課
+hyperframes-project/index.html
