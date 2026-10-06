@@ -164,7 +164,10 @@ writeFileSync(join(SCRIPTS, 'script-data.mjs'), `// ${SLUG} — 1~3 年級教學
 //   - .claude/skills/teaching-video-pipeline/references/teaching-rhythm.md   節奏與四拍法則
 import { createHash } from 'node:crypto';
 
-export const voiceId = (t) => createHash('sha1').update(speechText(t)).digest('hex').slice(0, 10);
+// tone／lead 是可選的配音語氣（見 SKILL.md「配音語氣」），沒寫就跟舊的雜湊一樣，既有音檔快取不會失效
+export const voiceId = (t, ln = {}) => createHash('sha1')
+  .update(speechText(t) + (ln.lead ? '|lead:' + ln.lead : '') + (ln.tone ? '|tone:' + ln.tone : ''))
+  .digest('hex').slice(0, 10);
 
 export const speechText = (t) =>
   t

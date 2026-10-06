@@ -1,0 +1,36 @@
+{
+  "slug": "2A1",
+  "title": "2A1 — 1~3 年級教學影片講稿",
+  "grade": "1~3 年級",
+  "scriptMd": "grade1-3.md",
+  "voiceDir": "assets/2A1/voice",
+  "bgmMusic": "assets/2A1/bgm-music.m4a",
+  "bgm": "assets/2A1/bgm.m4a",
+  "stepsDir": "assets/2A1/steps",
+  "minDuration": 900,
+  "capture": {
+    "dpr": 2,
+    "box": [
+      0,
+      46,
+      1248,
+      702
+    ]
+  },
+  "checkIns": [
+    "一樣嗎",
+    "做出來了嗎",
+    "做到了嗎",
+    "卡進去了嗎",
+    "存好檔案了嗎",
+    "帽子了嗎",
+    "打開了嗎",
+    "排排看",
+    "準備好了嗎",
+    "英文了嗎",
+    "跟著做一次",
+    "身體和手了嗎",
+    "遊樂場了嗎",
+    "頭了嗎"
+  ]
+}

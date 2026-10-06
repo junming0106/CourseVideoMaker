@@ -24,6 +24,7 @@ lessons/*/
 !lessons/PIPELINE.md
 hyperframes-project/assets/*/
 !hyperframes-project/assets/characters/
+!hyperframes-project/assets/doodles/
 !hyperframes-project/assets/backgrounds/
 !hyperframes-project/assets/scratch-blocks/
 !hyperframes-project/assets/scratch角色素材/

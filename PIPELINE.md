@@ -163,7 +163,7 @@ node ../../../tools/qc/verify-output.mjs ../output/grade1-3.mp4
 
 > ⚠️ **三個角色的配音「不要」平行**（2A4 修正）。
 > 它們的**寫入目標**確實不衝突（各寫各的 `voice-durations-<角色>.json`），
-> 但每個 `gen-voice.mjs` 內部併發 4 條，三個一起就是 **12 條打向 voai**。
+> 但每個 `gen-voice.mjs` 內部併發 4 條，三個一起就是 **12 條打向 Gemini API**。
 > 2A4 實測 311 句掉了 52 句。改成串行：
 > `for w in Cooper Max Cora; do node ../../../tools/produce/gen-voice.mjs $w; done`
 
@@ -247,7 +247,7 @@ composition 每多一個長音訊元素，載入就會超過框架的 10 秒上�
 ### 2A4 新增的坑
 
 **配音掉句是「靜默」的，不會印失敗**
-三角色併發（12 條）打 voai，2A4 掉了 52/311 句，`重試 3 次` 一次都沒觸發、`失敗` 一行都沒印——
+三角色併發（12 條）打 TTS API（當時是 voai，現已改 Gemini），2A4 掉了 52/311 句，`重試 3 次` 一次都沒觸發、`失敗` 一行都沒印——
 是進程直接崩在後面的轉 m4a 迴圈（`ffmpeg` 找不到那幾個缺的 wav）。
 崩掉的代價是 `voice-durations-<角色>.json` 整個寫不出來，前面幾百句的配額形同白花。
 **轉檔前一定要擋缺檔**：`existsSync(wav) && statSync(wav).size >= 1024`，缺的收集起來最後報出來並 `process.exitCode = 1`。
@@ -359,3 +359,19 @@ lint 不會擋（它是合法的文字節點）、渲染照跑。
 `opening.mp4` 不是只放開頭。片尾再放一次收得住，而且它有原音，
 背景音樂要在它開始前先壓到 0.22、結束前再淡到 0。
 時間軸要分成 `CONTENT`（講稿內容結束）與 `TOTAL`（含片尾），不要混用。
+
+---
+
+### 2A1 第二版（雪人，手繪風）新增的坑
+
+詳細規則與理由見 `.claude/skills/teaching-video-pipeline/references/visual-style.md`。這裡只記會讓產線出錯的那幾個：
+
+- **Gemini TTS 有每日上限**（Tier 1 每模型每分鐘 10 次、每天 100 次），被擋的請求也算額度；`TTS_RPM=9` 只解決每分鐘。預設改用 voai。
+- **`.env` 被 `.env.example` 覆蓋／`.env.example` 被填進真實值**：commit 前看每個值是不是空的。
+- **倒數鐘不要用 innerText 補間**：渲染逐格跳著抓，會顯示 0。
+- **Pillow `floodfill` 去背會從細線斷點漏進去**：先膨脹墨線封斷點。
+- **教案截圖有真實學生姓名**：`prep-assets.py` 遮蓋，登入畫面不用。
+- **`snapshot` 要加環境變數逾時**，否則第一次就 `Navigation timeout of 10000 ms`。
+- **學習目標開口秒數要在 build 算**，段落間 LEAD＋TAIL 每段多 1.6 秒。
+- **預覽用 `UNTIL_SEG=<段落id>`**，不要一次渲染整支。
+- 素材路徑 `assets/scratch角色素材/scratch角色素材/<資料夾>/`（多一層同名目錄），寫錯只會印一行 404。

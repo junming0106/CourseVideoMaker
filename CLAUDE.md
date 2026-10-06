@@ -6,12 +6,13 @@
 
 1. `.claude/skills/teaching-video-pipeline/SKILL.md` — 主規則（年級分級、角色、版面、配音）
 2. `.claude/skills/teaching-video-pipeline/references/teaching-rhythm.md` — **寫講稿前**：段落切分、提問四拍法則
+3. `.claude/skills/teaching-video-pipeline/references/visual-style.md` — **組畫面前**：三層版面、手繪風格、字卡收斂、等待鬧鐘、背景音樂、檢查流程
 3. `.claude/skills/teaching-video-pipeline/references/agent-orchestration.md` — **開工前**：哪些開 Agent、閘門怎麼判
 4. `.claude/skills/teaching-video-pipeline/references/codebrainy-capture.md` — **要實機截圖補素材時**：CodeBrainy 練習場操作 runbook
 5. `PIPELINE.md` — 執行時：各階段指令與踩過的坑
 6. `tools/README.md` — 每支腳本能不能單獨用、吃什麼吐什麼
 
-## 不能違反的三件事
+## 不能違反的六件事
 
 **① 講稿沒給使用者確認過，不要開始組動畫。**
 組完才發現方向錯要整支重來，配音的錢也白花。
@@ -28,8 +29,19 @@
 用 `tools/run-pipeline.mjs` 跑就不會錯，順序寫死在裡面。
 
 **③ 三個角色的配音要串行，不要平行。**
-每支 `gen-voice.mjs` 內部已經併發 4 條，三個一起就是 12 條打向 voai。
+每支 `gen-voice.mjs` 內部已經併發 4 條，三個一起就是 12 條打向 TTS API（Gemini 還有每日 100 次上限，開工前先查額度）。
 **掉句是靜默的**——2A4 實測 311 句掉了 52 句，一行失敗訊息都沒印。
+
+**④ `.env.example` 只放欄位名稱，值一律留空；真實金鑰只放 `.env`。**
+commit 前先看 `.env.example` 每個值是不是空的。2A1 發生過 `.env.example` 被填進真實的 voai 金鑰與帳密，差一點進版控；
+也發生過 `.env` 被 `.env.example` 覆蓋、舊金鑰整行消失。
+
+**⑤ 說「符合規範」之前，要用實際數字驗證。**
+2A1 初稿「前三句沒有問候」就回報符合開場規則，但實際學習目標在 42 秒才開口（段落緩衝、語速都沒算進去）。
+build 要自己算並檢查，不能只看台詞。其他同類：預估渲染／配音時間、預估片長，一律先量測再講。
+
+**⑥ 給使用者看之前，先自己抽格看過，再渲染 3 分鐘短預覽，最後才渲染整支。**
+整支 25 分鐘在這台機器要一個多小時。版面規則（全部在黑板內、三層不重疊、字卡 3 色、等待只在重大問題）見 `references/visual-style.md`。
 
 ## 兩個閘門
 

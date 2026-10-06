@@ -12,6 +12,7 @@ description: 將國小教案投影片轉化為 1~6 年級教學動畫短片的�
 | 文件 | 什麼時候讀 |
 |---|---|
 | [`references/teaching-rhythm.md`](references/teaching-rhythm.md) | **寫講稿前** — 課程骨架、段落切分、概念→實作交錯、等待學生的秒數、提問四拍法則 |
+| [`references/visual-style.md`](references/visual-style.md) | **組畫面前** — 三層版面（標題帶／內容區／字幕帶）、手繪風格、字卡收斂、等待鬧鐘、圈選、截圖處理、背景音樂、檢查流程。**每一條都是使用者退稿過的** |
 | [`references/agent-orchestration.md`](references/agent-orchestration.md) | **開工前** — 哪些開 Agent、哪些用腳本、兩個閘門的判定與重試上限 |
 | [`references/codebrainy-capture.md`](references/codebrainy-capture.md) | **實機補素材前** — CodeBrainy 練習場的網址、16:9 尺寸、疊積木 API、裁切與命名 |
 | `lessons/PIPELINE.md` | 執行時 — 各階段的實際指令與踩過的坑 |
@@ -80,7 +81,7 @@ for i in range(1, 40):
 - **角色定位固定**：Cooper 扮演「老師」主角，Cora 和 Max 是配角（學生/助教），三人「一搭一唱」對話推進教學——配角負責發問、答錯、驚呼、附和，老師負責引導與解答。不要讓單一角色從頭講到尾變成單純教課。
 - **課程要可愛有趣**：以對話情境帶出知識點，不是照唸投影片。配角可以裝傻、搞笑、故意猜錯，讓老師糾正。
 - **每個程式概念都要配一個生活化的生動例子**，先問小朋友、再用具體物品比喻、最後收斂回術語。範例（變數）：「小朋友你們知道變數是什麼嗎？你們是不是有很多爸爸媽媽買的玩具呢？每次玩完是不是都要收起來？賽車放賽車的收納箱、書本放書本的收納箱……變數就是一個箱子，可以幫你儲存東西！」
-- **畫面要有大量動畫**：對話用「對話框」呈現、提問時冒出「問號符號」動畫、答對時有星星/勾勾、關鍵詞要有彈跳/蓋章等進場效果，避免靜態字卡。這類常用素材（對話框、問號、驚嘆號、星星等）直接在 HyperFrames 內以 CSS/GSAP 實作。
+- **畫面要有動畫，但要收斂**：對話用「對話框」呈現（固定在黑板下緣的字幕帶）、答對時蓋章、圖片從下方升起、字卡彈出。**進場動畫只用 `pop`／`rise`／`stamp` 三種，字卡只有橘／藍／綠三種顏色、一種外形**，避免靜態字卡但也不要什麼都飛——2A5 那種十幾種卡片＋十幾種動畫，使用者看了回報「畫面太凌亂」。完整規則見 [`references/visual-style.md`](references/visual-style.md)。
 - **視覺風格要符合小學生喜好**：色彩鮮明（高飽和、活潑配色），圖卡與大字都要搭配動畫進場，不要沉悶的商務風。
 - **嚴禁使用 emoji 當畫面元素**。畫面上的每個東西都要是：
   1. `assets/scratch角色素材/`（338 個 Scratch 官方角色：貓 043_Cat_2、老鼠 162_Mouse1、樹 232_Trees、麵包 029_Bread、鈴鐺 025_Bell、星星 217_Star、綠旗 114_Green_Flag、停止 219_Stop、氣球 015_Balloon1、禮物 107_Gift⋯⋯）
@@ -147,12 +148,12 @@ const ACTIONS = {
 畫面提示：痛點字卡 `card({ text: '怎麼點都不會動？', tone: 'red', size: 'lg', fx: 'shake', at: 0 })`；Max 頭上冒出問號動畫
 ```
 
-> **第一句不可以是問候語。** 前 3 秒必須是痛點提問或反常識的問題，
+> **預設第一句不是長問候；但使用者（2A1）明確要求「開頭要有開場白打招呼，直接講話有點怪」——所以現行做法是第一句只放一句≤2 秒的短問候（「小朋友大家好！」），緊接著就是痛點提問，自我介紹仍然排後面。** 原則：問候要短、不能超過一句，痛點提問緊接著出現。原規則如下：前 3 秒必須是痛點提問或反常識的問題，
 > 自我介紹排到第 8 秒之後，片頭動畫最長 2 秒且不可放在第一句之前——
 > 這是學生退出率最高的位置，規則與句型見 [`references/teaching-rhythm.md`](references/teaching-rhythm.md)（一之二）。
 
 - 「動作」欄位只能填 [[角色動作對照表]] 裡列出的動作名稱，不要發明不存在的動作。build script 要把不合法的組合**當成錯誤印出並 `process.exitCode = 1`**，只收集不回報等於沒擋。
-- **每個觀念都要有一句直接問螢幕前學生的話，配 `hold` 給思考時間**（3~5 秒），再由 Max／Cora 示範回答。例如「換你想一個：如果天黑了，你就做什麼？」→ hold 5 →「想到了嗎？跟旁邊的人說說看。」單向講述的段落會讓低年級學生很快失去注意力。
+- **每個觀念都要有一句直接問螢幕前學生的話，由 Max／Cora 接著回答。但只有「重大問題」才配 `hold` 停頓**：練習題、複習題、「猜猜看」變化題、回扣開場的問題、必須動手的步驟（跟著操作、抄程式）。其他問題（一問一答就能解決的、反問句、看示範）**不要停，直接交給夥伴回答**——使用者回報「角色問自己夥伴話也變得會停頓」，2A1 第一版 52 處停頓最後只留 22 處。等待時顯示手繪鬧鐘，規則見 visual-style.md 第四節。例如「換你想一個：如果天黑了，你就做什麼？」→ hold 5 →「想到了嗎？跟旁邊的人說說看。」單向講述的段落會讓低年級學生很快失去注意力。
 - 講稿先產出後，**跟使用者確認內容是否符合該年級程度**，通過後才進入步驟 3。
 
 ## 角色動作對照表
@@ -214,6 +215,20 @@ const ACTIONS = {
 
 ## 步驟 3：用 HyperFrames 組裝動畫
 
+### 外觀一律用 `tools/lib/sketch.mjs`（手繪教室風）
+
+字卡外形、對話框、等待鬧鐘、版面常數、SVG 濾鏡都在 `tools/lib/sketch.mjs`，**新課直接 import，不要自己畫一套**：
+
+```js
+import { LAYOUT, SKETCH_DEFS, sketchCss, makeSketchKit, clockHtml, clockTimelineJS, bubbleHtml, bubbleTimelineJS }
+  from '../../../tools/lib/sketch.mjs';
+const { fx, fxOut, card } = makeSketchKit(hit);   // 收斂過：3 色字卡、pop／rise／stamp 三種動畫
+```
+
+範例看 `lessons/_reference-2A1/`，規則與理由看 [`references/visual-style.md`](references/visual-style.md)。
+**這份比下面「紅框與箭頭」「版面對齊統一背景」兩節新**：那兩節描述的是 2A4／2A5 的舊做法（`hl()` 紅框、`.vis` 版面），
+現行做法是 `guides()` 手繪圈選＋三層版面。
+
 ### 動畫與字卡一律套共用模組，不要重寫
 
 進場／離場動畫與字卡樣式都已經抽成模組，**寫 `build-composition.mjs` 時直接引用**：
@@ -255,7 +270,11 @@ const { arrow, circle, underline } = makePointers(fx, fxOut);
 
 ### 背景音樂
 
-每支教學影片都要有墊底的背景音樂。`media-use` 的 BGM 走 HeyGen catalog，需要先裝好 `heygen` CLI；沒有的話可以自己合成一段乾淨的循環（音樂盒／鐵琴音色最適合國小低年級）：正弦波疊 2、3 倍泛音搭配指數衰減包絡當旋律，低八度長音當鋪底，走 C–G–Am–F 這種明亮的和弦進行，做成 16 秒循環後用 `ffmpeg -stream_loop` 拉到全片長度，再加 `aecho` 混響與頭尾淡入淡出。
+每支教學影片都要有墊底的背景音樂。**不要用慢板的音樂盒**——2A1 第一版用 16 秒、慢速、單音琶音、長衰減的音樂盒，使用者回報「太讓人想睡覺了」。
+
+要的是**巧虎卡通那種悠閑輕快**：116 BPM、直拍，木琴旋律（短促、泛音亮），彈跳低音（第 1、3 拍）加烏克麗麗式反拍和弦，沙鈴每個八分音符、木魚落在 2、4 拍，和弦走 C–G–Am–F 這類大調明亮的進行，回音要短。
+`tools/produce/mk-bgm.py` 純合成、不用外部素材（一圈 16 小節約 33 秒，用 `ffmpeg -stream_loop` 拉到全片長度），`run-pipeline` 在缺音樂或音樂比片短時自動跑。
+`media-use` 的 BGM 走 HeyGen catalog，要先裝 `heygen` CLI，沒有就用上面這支。細節與參數見 [`references/visual-style.md`](references/visual-style.md) 第七節。
 
 接進 composition 的方式：
 
@@ -416,6 +435,8 @@ tl.to('#<id>-card', { x: 1500, duration: 0.7, ease: 'power3.in' }, S + E - 0.8);
 
 ## 紅框與箭頭
 
+> 現行做法見 `lessons/_reference-2A1/scripts/build-composition.mjs` 的 `guides()`（手繪圈選、一次一個、座標用百分比）。下面的 `hl()` 是 2A4／2A5 的舊做法，原則（講到哪框哪、綁台詞內容、不目測）仍然有效。
+
 講到哪一塊就框哪一塊，這是教學影片最有效的引導手段。
 
 ```js
@@ -509,6 +530,8 @@ Cooper：對，沒錯！這個程式是用來讓角色向右旋轉十五度的�
 
 ## 版面對齊統一背景
 
+> 這節是 2A5 的舊版面（`.vis` 容器）。**現行三層版面（標題帶／內容區／字幕帶）見 [`references/visual-style.md`](references/visual-style.md)。**
+
 用統一教學背景時，**要先讀背景圖的實際幾何，把內容容器對齊可用區的中心**，不要憑感覺放。`classroom-board.svg` 的綠板內緣是 `y 196~904`，中心在 550，所以：
 
 ```css
@@ -541,19 +564,76 @@ CSS/GSAP 在 composition 裡實作——那些東西不值得為它另外開一�
 只有「同一套 React 元件要在網站與多支影片之間共用」時才值得補一個 Remotion 專案，
 補了之後把輸出的透明背景 webm 放進 `hyperframes-project/assets/` 給 composition 取用。
 
-## 角色配音（voai TTS）
+## 角色配音
 
-中文配音走 **voai**（<https://connect.voai.ai/doc-vocal/index.html>），API key 放在專案根目錄 `.env` 的 `voaiAPI`，**絕對不要寫進任何輸出檔或印出來**。
+**預設用 voai**（`tools/produce/gen-voice.mjs`）：沒有每日次數上限，三個角色 408 句約 5 分鐘合成完；金鑰放專案根目錄 `.env` 的 `voaiAPI`，
+**絕對不要寫進任何輸出檔或印出來**。聲音固定（寫在 `gen-voice.mjs` 的 `VOICES`）：
 
-### 三位角色的固定配音設定
+| 角色 | 聲音 | 版本 |
+|---|---|---|
+| Cooper（老師） | 子睿 | Classic |
+| Max（學生） | 軒軒 | Neo |
+| Cora（學生） | 泡泡 | Neo |
 
-| 角色 | 語者 | 年齡／聲線 | 模型版本 |
-|---|---|---|---|
-| Cooper（老師） | 子睿 | 5 歲男聲・演繹聲線 | Classic |
-| Max（學生） | 軒軒 | 8 歲男聲・真實聲線 | Neo |
-| Cora（學生） | 泡泡 | 7 歲女聲・真實聲線 | Neo |
+語者只存在於特定模型版本，**不能混用**。voai 沒有語氣參數：`tone`／`lead` 只會參與檔名雜湊（讓雜湊跟 build 查長度的算法一致），不會送出。
 
-style 一律「預設」，speed／pitch_shift／style_weight／breath_pause 全部用預設值。**語者只存在於特定模型版本，不能混用**——先呼叫 `GET /TTS/GetSpeaker` 確認語者在哪個 `models[].info.version` 底下，用錯版本會直接失敗。
+### 備案：Gemini TTS（`tools/produce/gen-voice-gemini.mjs`，用的時候複製成 `gen-voice.mjs`）
+
+模型 `gemini-3.8-flash-tts`／`gemini-3.8-flash-lite-tts`（<https://ai.google.dev/gemini-api/docs/speech-generation>），
+金鑰 `GEMINI_API_KEY`、聲音 ID `VOICE_COOPER`／`VOICE_MAX`／`VOICE_CORA`（`voice_...` 格式，Google AI Studio 的 Voice Design／語音複製建立）。
+支援 `tone`（英文情緒）與 `lead`（人聲標籤）。
+
+> ⚠ **開工前先查額度，不要一開始就併發跑。** 2A1 實測踩到：Tier 1 **每個模型每分鐘 10 次、每天 100 次**請求，一支 25 分鐘的片（約 400 句）要分 4 天才跑得完；
+> Flash 與 Flash-Lite 的每日額度各自獨立（所以換 Lite 能多跑 100 句），但也只是多撐一天。
+> - 每分鐘上限可以繞：`TTS_RPM=9 node ../../../tools/produce/gen-voice-gemini.mjs <角色>`（腳本內建節流）。
+> - **每日上限沒辦法繞。** 升級 Tier 要累計消費 100 美元，短期做不到。
+> - 先用併發跑會被 429 擋掉，**被擋的請求也算進每日額度**，白白浪費。
+> - 模型可用 `TTS_MODEL=` 覆蓋；換模型會讓 `.voice-stamp` 對不上，舊音檔要先移開。
+
+兩個限制：Gemini TTS 把輸入文字**嚴格當逐字稿**，`<...>` 角括號會被當成語音標記（`<laugh>`、`<short pause>`），所以 `text`（字幕）裡不要出現，要用的話寫在 `lead` 欄位；另外單次請求只合成一句，沒有 speed／pitch 參數。
+
+**換聲音或換服務之後，要先把 `assets/<slug>/voice/<角色>/` 移開**——檔名只看台詞文字，舊音檔會被當成快取。`gen-voice.mjs` 會在該資料夾記一個 `.voice-stamp`，對不上就直接停下來，不會默默混用兩種聲音。
+
+> ⚠ **`.env` 與 `.env.example` 分清楚。** `.env.example` 只放欄位名稱、**值一律留空**，會進版控；真實金鑰只放 `.env`（已被 `.gitignore` 擋掉）。
+> 2A1 發生過兩次：一是 `.env` 被 `.env.example` 的內容覆蓋，舊的 `voaiAPI` 整行消失（金鑰沒有備份，要去 voai 後台重拿）；
+> 二是 `.env.example` 被填進真實的金鑰與帳密，差一點 commit 進去。**commit 前一定要看 `.env.example` 的每個值是不是空的。**
+
+### 配音語氣：`tone` 與 `lead`
+
+讓語調有起伏用兩個**可選**欄位，寫在台詞上，沒寫就是預設語氣：
+
+```js
+{ who: 'Max', action: 'thinking', text: '我的貓咪又撞牆了⋯', tone: 'sad and disappointed', lead: '<sigh>' }
+{ who: 'Cooper', action: 'talking', text: '你自己發現順序要對調，這就是除錯！', tone: 'warm and proud' }
+```
+
+| 欄位 | 對應官方什麼 | 放什麼 |
+|---|---|---|
+| `tone` | `speech_metadata.style`（整句） | **英文**的情緒／語速，如 `warm and proud`、`gentle and reassuring`、`excited and amazed`、`sheepish and a little embarrassed`、`slower, curious` |
+| `lead` | 行內標籤（句首） | 官方列的人聲標籤，如 `<sigh>`、`<gasp>`、`<giggle>`、`<chuckle>`、`<cheer>`、`<whispers>`、`<short pause>` |
+
+⚠️ **沒有 `<sad>` 這種情緒標籤。** 官方的角括號標籤全是「人聲事件」（嘆氣、倒抽一口氣、笑），情緒要寫在 `tone`。
+`gen-voice.mjs` 內建白名單，`lead` 寫了不在官方清單的標籤會直接報錯，不會把 `<sad>` 當文字唸出來。
+
+規則：
+
+- **用英文寫**：官方說明，非英文逐字稿也應使用英文標籤與 style 才有最佳效果
+- `tone` 只寫情緒、語速、音量；**不寫年齡、性別、口音**（已烤在聲音 ID）
+- `lead` 只放句首，字幕的 `text` 不要寫標籤；兒童影片避開 `<scream>`、`<cry>`、`<sob>`、`<cackle>`、`<growl>`
+- **適度**：預設不加，整支影片約 15~25% 的句子有 `tone` 就夠，每句都加就沒有起伏了
+- `tone`／`lead` 會進語音雜湊：改了就會重新合成那一句（沒寫的句子雜湊不變，既有快取不失效）
+- **新設的語氣先試聽 3 句再整批跑**：這個功能的中文效果沒有實測過，且按 token 計費
+
+建議搭配（對應 teaching-rhythm.md 七之二）：
+
+| 情境 | `tone` | `lead` |
+|---|---|---|
+| Cooper 出題、等學生想 | `curious and encouraging` | |
+| Cooper 具體鼓勵 | `warm and proud` | |
+| Cooper 錯誤正常化 | `gentle and reassuring` | |
+| 學生犯錯、程式失敗 | `sheepish and a little embarrassed` | `<sigh>` |
+| 學生驚呼、發現答案 | `excited and amazed` | `<gasp>` |
+| 學生猜答案前 | `thinking out loud` | `<short pause>` |
 
 ### 字幕文字與語音文字必須分開
 
@@ -586,12 +666,11 @@ export const voiceId = (t) => createHash('sha1').update(speechText(t)).digest('h
 
 ### 產生流程
 
-`lessons/<slug>/scripts/gen-voice.mjs <角色> [--dry]` 會讀 `script-data.mjs`、逐句打 `POST /TTS/Speech`，輸出 `assets/voice/<角色>/<雜湊>.wav`，並寫出 `voice-durations-<角色>.json`。重點：
+`cd lessons/<slug>/scripts && node ../../../tools/produce/gen-voice.mjs <角色> [--dry]` 會讀 `script-data.mjs`、逐句打 TTS API（存成 wav），輸出 `assets/<slug>/voice/<角色>/<雜湊>.wav`，並寫出 `voice-durations-<角色>.json`。重點：
 
-- **動手合成前先跑 `--dry`**，印出這次會花多少字，再對照 `GET /Key/Usage`。
-- `GET /Key/Usage` 要用 `x-api-key` 標頭（`Authorization: Bearer` 會回 401）；回傳的 `current` 是**剩餘額度**，不是已用量（`total` 才是總額）。看反了會誤判成配額快用完。
+- **動手合成前先跑 `--dry`**，印出這次要合成幾句／幾字。voai 用 `GET /Key/Usage` 查剩餘字數（一支 25 分鐘的片約 5,800 字）；Gemini 沒有餘額查詢端點，用量到 Google AI Studio 的 Usage 頁看。
 - 併發 4 條、失敗重試 3 次即可，不要打太兇。
-- **三個角色一定要串行跑，不要用 shell `&` 同時開**。它們的寫入目標確實不衝突，但每個進程內部就併發 4 條，三個一起＝ 12 條打向 voai。2A4 實測 311 句掉了 52 句，而且**完全沒有印出失敗訊息**——重試一次都沒觸發，是進程直接崩在後面的轉檔迴圈。
+- **三個角色一定要串行跑，不要用 shell `&` 同時開**。它們的寫入目標確實不衝突，但每個進程內部就併發 4 條，三個一起＝ 12 條打向 TTS API（2A4 用 voai 時）。2A4 實測 311 句掉了 52 句，而且**完全沒有印出失敗訊息**——重試一次都沒觸發，是進程直接崩在後面的轉檔迴圈。
 - **轉 m4a 前一定要擋缺檔**（`existsSync(wav) && size >= 1024`），缺的收集起來最後報出來並 `process.exitCode = 1`。少了這道保護，只要一句沒拿到音檔，`ffmpeg` 就會炸掉整支腳本，`voice-durations-<角色>.json` 整個寫不出來，前面幾百句的配額形同白花。內容雜湊當檔名，補跑只會重打缺的那幾句。
 - `new URL(...).pathname` 在含中文／空白的路徑會有 percent-encoding，餵給 `ffprobe` 會找不到檔案——一律用 `fileURLToPath()`。
 - **合成完要轉一份 m4a**（`-c:a aac -b:a 96k`）給 composition 用，wav 只留著當快取來源。原因見下面「composition 的元素數量上限」。
@@ -627,9 +706,19 @@ A 講完約 0.25 秒 B 就接上，這是自然對話的節奏。需要學生思
 - [ ] **操作截圖已裁到該步驟的重點區域**，不是整張編輯器縮小塞進卡片
 - [ ] **教案提到的角色／背景在學生系統裡確實找得到**（名稱也要一致）
 - [ ] 配音句數 ＝ 講稿句數（`voice-durations-*.json` 的鍵數對得上，沒有靜默掉句）
-- [ ] 每個觀念都有一句直接問螢幕前學生的話，配 `hold` 停頓
+- [ ] 每個觀念都有一句直接問螢幕前學生的話；**只有重大問題（練習題、複習、猜猜看、回扣、必須動手）才有 `hold`**，其他由夥伴直接回答
 - [ ] 抽 6~8 格 `snapshot` 確認沒有空白畫面（元素進場太晚／退場太早）
 - [ ] 片長 ≥ 15 分鐘，且是靠內容而不是拉長留白撐出來的
+- [ ] **學習目標在 12~15 秒內開口**（build 要自己算並檢查，不能只看前三句台詞；段落之間的 LEAD／TAIL 緩衝每段會多 1.6 秒）
+- [ ] **全部元素都在綠板內**（x 280~1640、y 222~880），標題帶／內容區／字幕帶互不重疊
+- [ ] 字卡只有 3 種顏色、1 種外形；進場動畫只有 pop／rise／stamp
+- [ ] 用完的字卡、圖片有清掉；要留的有固定位置
+- [ ] 有停頓的畫面中間（x 860~1060、y 475~665）是空的，鬧鐘在黑板正中央，數字逐個顯示（不用 innerText 補間）
+- [ ] 圈選／箭頭是手繪風、一次只有一個
+- [ ] 教案截圖裡**沒有真實學生姓名／帳號**（已遮蓋或不使用）
+- [ ] 背景音樂是輕快版（mk-bgm.py），不是慢板音樂盒
+- [ ] `.env.example` 的每個值都是空的
+- [ ] 每一段都抽中點畫面看過（`snapshot` 分批、3×3 拼貼圖逐張看），再渲染 3 分鐘短預覽給使用者確認方向，**最後才渲染整支**
 
 渲染後：
 
@@ -662,7 +751,10 @@ A 講完約 0.25 秒 B 就接上，這是自然對話的節奏。需要學生思
 | `lib/course.mjs` `lib/course.py` | 由 cwd 解析課程脈絡，載入 `course.json` 與 `script-data.mjs` |
 | `analyze/prep-course.mjs` | 丟一份 pptx 進來，抽出逐頁摘要＋建好課程骨架（`--summary-only` 只讀不寫） |
 | `run-pipeline.mjs` | 把配音→組建→音樂床→檢查→渲染→抽驗串成一條，順序寫死不會跑錯 |
-| `produce/gen-voice.mjs` | voai TTS 批次合成（內容雜湊快取、`--dry` 估算配額、缺檔保護、順便轉 m4a） |
+| `produce/gen-voice.mjs` | voai TTS 批次合成（內容雜湊快取、`--dry` 估算配額、缺檔保護、順便轉 m4a）。備案 `gen-voice-gemini.mjs`（`TTS_RPM`／`TTS_MODEL`） |
+| `produce/mk-clips.mjs` | 教案附的螢幕錄影裁區段、變速到剛好撐滿段落、靜音（讀 build 產生的 `clip-plan.json`） |
+| `produce/mk-bgm.py` | 合成輕快的背景音樂並接長到全片長度（`run-pipeline` 缺音樂時自動跑） |
+| `lib/sketch.mjs` | 手繪風格：版面常數、SVG 濾鏡、字幕對話框、等待鬧鐘、收斂過的字卡與動畫 |
 | `produce/mk-audio-bed.py` | 把音樂與音效預混成單一音樂床 |
 | `produce/gen-script-md.mjs` | 產生人類可讀的講稿 markdown（含配音唸法與實際秒數） |
 | `qc/check-questions.py` | 找出有停頓卻沒收尾的提問 |

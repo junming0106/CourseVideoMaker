@@ -1,7 +1,8 @@
-// 用 voai TTS 產生角色配音
+// 用 Gemini 3.8 Flash TTS 產生角色配音
 // 用法：node gen-voice.mjs [角色名稱] [--dry]     （預設 Cooper）
 //
-// - API key 從專案根目錄 .env 的 voaiAPI 讀取，不寫進任何輸出檔
+// - API key 從專案根目錄 .env 的 GEMINI_API_KEY 讀取，不寫進任何輸出檔
+// - 三個角色的聲音 ID（voice_...）從 .env 的 VOICE_COOPER / VOICE_MAX / VOICE_CORA 讀取
 // - 檔名＝口說文字的雜湊，只有台詞真的改了才會重新合成（插入/搬移句子不會失效）
 // - --dry 只印出這次會花多少字，不呼叫 API
 // - 輸出：<course.json 的 voiceDir>/<角色>/<雜湊>.wav（快取）與同名 .m4a（composition 實際引用）
@@ -14,24 +15,38 @@ import { cfg, ROOT, proj, here, loadScript } from '../lib/course.mjs';
 
 const { SEGS, speechText, voiceId } = await loadScript();
 
-// 每個角色的配音設定（語者只存在於特定模型版本，不能混用）
-const VOICES = {
-  Cooper: { speaker: '子睿', style: '預設', version: 'Classic' },  // 5 歲男聲・演繹聲線
-  Max:    { speaker: '軒軒', style: '預設', version: 'Neo' },      // 8 歲男聲・真實聲線
-  Cora:   { speaker: '泡泡', style: '預設', version: 'Neo' },      // 7 歲女聲・真實聲線
-};
+// 每個角色對應 .env 裡的聲音 ID 欄位（Voice Design 或語音複製建出來的 voice_...）
+const VOICE_ENV = { Cooper: 'VOICE_COOPER', Max: 'VOICE_MAX', Cora: 'VOICE_CORA' };
+// 預設 Flash；額度吃緊時可用 TTS_MODEL=gemini-3.8-flash-lite-tts。換模型會讓 .voice-stamp 對不上，舊音檔要先移開
+const MODEL = process.env.TTS_MODEL || 'gemini-3.8-flash-tts';
+// 官方文件列出的行內人聲標籤（沒有 <sad> 這種情緒標籤，情緒要寫在 tone → style）
+const LEADS = new Set(['<argh>', '<breath>', '<heavy breath>', '<exhales>', '<cackle>', '<cheer>', '<chuckle>',
+  '<cough>', '<cry>', '<gasp>', '<giggle>', '<groan>', '<growl>', '<grunt>', '<grr>', '<hiss>', '<laugh>',
+  '<moan>', '<pant>', '<pff>', '<scream>', '<shout>', '<shriek>', '<sigh>', '<sneeze>', '<snicker>', '<snort>',
+  '<sob>', '<throat-clearing>', '<tsk>', '<whimper>', '<whispers>', '<yawn>', '<short pause>', '<long pause>']);
 const WHO = process.argv[2] ?? 'Cooper';
 const DRY = process.argv.includes('--dry');
-const { speaker: SPEAKER, style: STYLE, version: VERSION } = VOICES[WHO] ?? {};
-if (!SPEAKER) throw new Error(`未定義 ${WHO} 的配音設定`);
+if (!VOICE_ENV[WHO]) throw new Error(`未定義 ${WHO} 的配音設定`);
 
 const OUT_DIR = pathToFileURL(proj(cfg.voiceDir, WHO) + '/');
 
 const env = readFileSync(new URL('.env', ROOT), 'utf-8');
-const KEY = env.match(/^voaiAPI=(.+)$/m)?.[1]?.trim();
-if (!KEY) throw new Error('.env 裡找不到 voaiAPI');
+const envVal = (k) => env.match(new RegExp(`^${k}=(.+)$`, 'm'))?.[1]?.trim();
+const KEY = envVal('GEMINI_API_KEY');
+const VOICE = envVal(VOICE_ENV[WHO]);
+if (!KEY) throw new Error('.env 裡找不到 GEMINI_API_KEY');
+if (!VOICE) throw new Error(`.env 裡找不到 ${VOICE_ENV[WHO]}`);
 
 mkdirSync(OUT_DIR, { recursive: true });
+
+// 檔名只由台詞文字決定，換了聲音 ID 或模型後舊音檔仍會被當成快取沿用，
+// 所以記下「這個資料夾是用哪個聲音合成的」，不一致就停下來，不默默混用兩種聲音。
+const STAMP = new URL('.voice-stamp', OUT_DIR);
+const stamp = `${MODEL} ${VOICE}`;
+if (existsSync(STAMP) && readFileSync(STAMP, 'utf-8').trim() !== stamp) {
+  throw new Error(`${WHO} 的語音快取是用別的聲音／模型合成的。確定要換的話，先刪掉 ${OUT_DIR.pathname} 再重跑`);
+}
+if (!DRY) writeFileSync(STAMP, stamp);
 
 // 收集該角色的所有台詞。檔名就是內容雜湊，所以檔案存在＝內容沒變＝可以沿用。
 // 同一句話出現在不同段落時會共用同一個音檔，不會重複計費。
@@ -40,10 +55,12 @@ const jobs = [];
 for (const seg of SEGS) {
   for (const ln of seg.lines) {
     if (ln.who !== WHO) continue;
-    const id = voiceId(ln.text, ln);   // 與 build 查長度的雜湊一致；Voai 不支援 tone／lead，所以只參與檔名、不送出
+    const id = voiceId(ln.text, ln);
     if (seen.has(id)) continue;
     seen.add(id);
-    jobs.push({ id, text: speechText(ln.text) });
+    if (ln.lead && !LEADS.has(ln.lead)) throw new Error(`不支援的語氣標籤 lead: ${ln.lead}（${ln.text}）`);
+    // 標籤只放在 lead：字幕的 text 不能出現 <...>，否則會被字幕秀出來
+    jobs.push({ id, text: (ln.lead ? `${ln.lead} ` : '') + speechText(ln.text), tone: ln.tone });
   }
 }
 
@@ -54,34 +71,48 @@ const isFresh = (job) => {
 
 const todo = jobs.filter((j) => !isFresh(j));
 const cost = todo.reduce((a, j) => a + j.text.length, 0);
-console.log(`${WHO}（${SPEAKER}／${VERSION}）：共 ${jobs.length} 句`);
+console.log(`${WHO}（${VOICE}）：共 ${jobs.length} 句`);
 console.log(`  需合成 ${todo.length} 句 / ${cost} 字，沿用快取 ${jobs.length - todo.length} 句`);
 if (DRY) process.exit(0);
+
+// 帳號有每分鐘請求上限時（Tier 1 是 10 次/分，併發 4 條必吃 429），用 TTS_RPM=9 節流；不設就維持原本行為
+const RPM = Number(process.env.TTS_RPM || 0);
+let nextSlot = 0;
+async function pace() {
+  if (!RPM) return;
+  const at = Math.max(Date.now(), nextSlot);
+  nextSlot = at + 60_000 / RPM;
+  if (at > Date.now()) await new Promise((r) => setTimeout(r, at - Date.now()));
+}
 
 async function synth(job) {
   const file = new URL(`${job.id}.wav`, OUT_DIR);
   if (isFresh(job)) return 'cached';
+  await pace();
 
-  const res = await fetch('https://connect.voai.ai/TTS/Speech', {
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
     method: 'POST',
-    headers: {
-      'x-api-key': KEY,
-      'x-output-format': 'wav',
-      'Content-Type': 'application/json',
-    },
+    headers: { 'x-goog-api-key': KEY, 'Content-Type': 'application/json' },
+    // 卡住的連線不會自己斷，沒有 timeout 會讓整批停在那裡
+    signal: AbortSignal.timeout(120_000),
     body: JSON.stringify({
-      version: VERSION,
-      text: job.text,
-      speaker: SPEAKER,
-      style: STYLE,
-      speed: 1,
-      pitch_shift: 0,
-      style_weight: 0,
-      breath_pause: 0,
+      model: MODEL,
+      // tone 是整句的情緒／語速（英文），例如 'sad and disappointed'；
+      // 不要寫年齡、性別、口音，那些已經烤在聲音 ID 裡
+      input: [{ type: 'user_input', content: [{
+        type: 'text', text: job.text,
+        ...(job.tone && { annotations: [{ type: 'speech_metadata', style: job.tone }] }),
+      }] }],
+      response_format: { type: 'audio' },   // 單次請求預設回 24kHz 單聲道 WAV（含 RIFF 標頭），直接存檔即可
+      generation_config: { speech_config: [{ voice: VOICE }] },
     }),
   });
   if (!res.ok) throw new Error(`${job.id}: HTTP ${res.status} ${await res.text()}`);
-  const buf = Buffer.from(await res.arrayBuffer());
+  const body = await res.json();
+  const audio = body.steps?.filter((s) => s.type === 'model_output')
+    .flatMap((s) => s.content ?? []).filter((c) => c.type === 'audio').at(-1);
+  if (!audio?.data) throw new Error(`${job.id}: 回應裡沒有音訊 ${JSON.stringify(body).slice(0, 300)}`);
+  const buf = Buffer.from(audio.data, 'base64');
   if (buf.length < 1000) throw new Error(`${job.id}: 音檔過小 (${buf.length} bytes)`);
   writeFileSync(file, buf);
   return 'new';

@@ -192,13 +192,14 @@ node tools/analyze/prep-course.mjs ~/Downloads/2A6.pptx
 
 | 腳本 | 吃什麼 | 吐什麼 |
 |---|---|---|
-| `gen-voice.mjs <角色> [--dry]` | `script-data.mjs`、`.env` 的 `voaiAPI` | `<voiceDir>/<角色>/<雜湊>.{wav,m4a}`、`voice-durations-<角色>.json` |
+| `gen-voice.mjs <角色> [--dry]` | `script-data.mjs`、`.env` 的 `GEMINI_API_KEY`、`VOICE_COOPER/MAX/CORA` | `<voiceDir>/<角色>/<雜湊>.{wav,m4a}`、`voice-durations-<角色>.json` |
 | `gen-script-md.mjs <輸出.md>` | `script-data.mjs`、`voice-durations-*.json` | 人類可讀講稿（含每句實際秒數與配音唸法） |
 | `mk-audio-bed.py` | `course.json` 的 `bgmMusic`、`sfx-cues.json` | `course.json` 的 `bgm`（音樂＋音效預混成一條） |
 | `crop-step.py <整頁截圖> <檔名>` | 整頁操作截圖 | `<stepsDir>/<檔名>`（裁成編輯器的 16:9） |
 | `crop-code.py <來源> <輸出> <x> <y> <w> <h>` | 整頁截圖 | 單段程式碼圖（四周留白 14px） |
 | `measure-code.py <程式碼圖>...` | 程式碼圖 | 紅框的百分比座標（印在終端機，貼進 `build-composition.mjs`） |
 | `mk-click-sfx.py` | — | `assets/sfx/click.wav` |
+| `make-doodles.py` | —（種子固定，重跑結果相同） | `assets/doodles/{star,tick,cross}.svg`、`assets/backgrounds/classroom-board.svg`（課本手繪風） |
 
 **三個角色的配音一定要串行**：
 
@@ -206,7 +207,7 @@ node tools/analyze/prep-course.mjs ~/Downloads/2A6.pptx
 for w in Cooper Max Cora; do node ../../../tools/produce/gen-voice.mjs $w; done
 ```
 
-平行跑會變成 12 條併發打 voai，**掉句是靜默的**——2A4 實測 311 句掉了 52 句，
+平行跑會變成 12 條併發打 Gemini API，**掉句是靜默的**——2A4 實測 311 句掉了 52 句，
 一行失敗訊息都沒印。檔名是內容雜湊，補跑只會重打缺的那幾句，不會重複計費。
 
 ---
@@ -321,3 +322,14 @@ node ../../../tools/run-pipeline.mjs --from build # 從某一步接著跑
 
 配音跑完會**比對句數**：三個角色的 `voice-durations-*.json` 少任何一句就中止，
 因為往下跑會做出「字幕對不上聲音」的影片。再跑一次只會補缺的那幾句。
+
+---
+
+## 2A1 之後新增
+
+| 檔案 | 做什麼 |
+|---|---|
+| `lib/sketch.mjs` | 手繪教室風：版面常數、SVG 濾鏡、字幕對話框、等待鬧鐘、收斂過的字卡與動畫（範例：`lessons/_reference-2A1/`） |
+| `produce/mk-clips.mjs` | 教案螢幕錄影裁區段、變速撐滿段落、靜音；讀 build 產生的 `clip-plan.json`，`run-pipeline` 自動跑 |
+| `produce/mk-bgm.py` | 合成輕快背景音樂並接長到片長；缺音樂時 `run-pipeline` 自動跑 |
+| `produce/gen-voice-gemini.mjs` | Gemini TTS 備案（`TTS_RPM`、`TTS_MODEL`），用時複製成 `gen-voice.mjs` |

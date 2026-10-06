@@ -59,13 +59,7 @@ const run = (label, cmd, cmdArgs, opts = {}) => {
 for (const f of ['script-data.mjs', 'build-composition.mjs', 'course.json']) {
   if (!existsSync(here(f))) throw new Error(`缺少 ${f}——先寫完講稿與版面再跑這支`);
 }
-if (!existsSync(proj(cfg.bgmMusic))) {
-  console.error(`⚠ 找不到純音樂 ${cfg.bgmMusic}`);
-  console.error('  音樂床要比片長更長。可從既有課程接一段：');
-  console.error('  ffmpeg -i <來源>.m4a -t 320 -c copy /tmp/h.m4a && \\');
-  console.error(`  ffmpeg -i <來源>.m4a -i /tmp/h.m4a -filter_complex "[0:a][1:a]acrossfade=d=3" -c:a aac -b:a 128k ${proj(cfg.bgmMusic)}`);
-  process.exit(1);
-}
+// 純音樂缺了或比片短，不再中止：build 之後會用 mk-bgm.py 自動合成（要先有 sfx-cues.json 才知道片長）
 
 // ---- ① 配音（三個角色一定要串行，併發會靜默掉句） ----
 if (want('voice')) {
@@ -82,7 +76,7 @@ if (want('voice')) {
     const f = here(`voice-durations-${who}.json`);
     if (!existsSync(f)) throw new Error(`缺 voice-durations-${who}.json——配音沒跑完`);
     const have = new Set(Object.keys(JSON.parse(readFileSync(f, 'utf-8'))));
-    const need = new Set(SEGS.flatMap((s) => s.lines).filter((l) => l.who === who).map((l) => voiceId(l.text)));
+    const need = new Set(SEGS.flatMap((s) => s.lines).filter((l) => l.who === who).map((l) => voiceId(l.text, l)));
     const miss = [...need].filter((k) => !have.has(k));
     if (miss.length) { console.error(`✗ ${who} 少了 ${miss.length} 句語音`); bad += miss.length; }
   }
@@ -94,8 +88,19 @@ if (want('voice')) {
 if (want('build')) {
   run('組建 composition', 'node', [here('build-composition.mjs'), INDEX]);
   writeFileSync(INDEX, `<!-- course: ${cfg.slug} -->\n` + readFileSync(INDEX, 'utf-8'));
+  // 教案附的螢幕錄影要變速到剛好撐滿段落；每段需要的秒數是 build 才算得出來的（clip-plan.json）
+  run('錄影變速（有 clip-plan.json 才做事）', 'node', [join(PRODUCE, 'mk-clips.mjs')]);
 }
-if (want('audio')) run('混音樂床 + 音效', 'python3', [join(PRODUCE, 'mk-audio-bed.py')]);
+if (want('audio')) {
+  // 純音樂要比片長更長，否則後面整段沒有音樂（而且是靜默的）。缺或不夠長就自己合成一段。
+  const total = JSON.parse(readFileSync(here('sfx-cues.json'), 'utf-8')).total;
+  let have = 0;
+  if (existsSync(proj(cfg.bgmMusic))) {
+    have = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', proj(cfg.bgmMusic)], { encoding: 'utf-8' }));
+  }
+  if (have < total + 1) run(`合成背景音樂（現有 ${have.toFixed(0)} 秒，需要 ${Math.ceil(total)} 秒以上）`, 'python3', [join(PRODUCE, 'mk-bgm.py')]);
+  run('混音樂床 + 音效', 'python3', [join(PRODUCE, 'mk-audio-bed.py')]);
+}
 
 // ---- ④ 檢查 ----
 if (want('lint')) {

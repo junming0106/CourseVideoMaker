@@ -10,7 +10,10 @@ import { createHash } from 'node:crypto';
 // 語音檔名用「口說文字的雜湊」，不用段落＋句序：
 // 用句序當檔名的話，在中間插一句就會讓後面每一句的檔名整批位移，
 // 快取全部失效、白白重跑一次 TTS 配額。
-export const voiceId = (t) => createHash('sha1').update(speechText(t)).digest('hex').slice(0, 10);
+// tone／lead 是可選的配音語氣（見 SKILL.md「配音語氣」），沒寫就跟舊的雜湊一樣，既有音檔快取不會失效
+export const voiceId = (t, ln = {}) => createHash('sha1')
+  .update(speechText(t) + (ln.lead ? '|lead:' + ln.lead : '') + (ln.tone ? '|tone:' + ln.tone : ''))
+  .digest('hex').slice(0, 10);
 
 export const speechText = (t) =>
   t

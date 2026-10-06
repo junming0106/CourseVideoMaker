@@ -12,7 +12,7 @@ import { SEGS, voiceId } from './script-data.mjs';
 // 路徑（語音、音樂床）的單一事實來源：course.json，共用腳本也讀同一份
 const CFG = JSON.parse(readFileSync(new URL('course.json', import.meta.url), 'utf-8'));
 
-// 角色配音（voai TTS）。有配音的角色用實際語音長度排時間，沒有的維持字數估算。
+// 角色配音（Gemini TTS）。有配音的角色用實際語音長度排時間，沒有的維持字數估算。
 const VOICE_DIR = CFG.voiceDir;
 const voiceDur = {};
 for (const who of ['Cooper', 'Max', 'Cora']) {
@@ -71,7 +71,7 @@ const spriteArt = (src, h, style = '', attrs = '') => {
 
 const SPRITE = {
   cat: sp('043_Cat_2', '01_cat_2.svg'),
-  star: sp('217_Star', '01_star.svg'),
+  star: 'assets/doodles/star.svg',
   flag: sp('114_Green_Flag', '01_green_flag.svg'),
   stop: sp('219_Stop', '01_stop.svg'),
   ball: sp('214_Soccer_Ball', '01_soccer_ball.svg'),
@@ -281,7 +281,7 @@ for (const seg of SEGS) {
   seg.start = r2(t);
   let cur = LEAD;
   seg.L = seg.lines.map((ln) => {
-    const key = voiceId(ln.text);
+    const key = voiceId(ln.text, ln);
     const vd = voiceDur[ln.who]?.[key];
     const d = vd ? r2(vd + VOICE_PAD) : durOf(ln.text);
     const o = { ...ln, rel: r2(cur), dur: d, voice: vd ? `${VOICE_DIR}/${ln.who}/${key}.m4a` : null };
@@ -1151,8 +1151,9 @@ const CSS = `
       .optlab { position: absolute; top: -18px; left: -14px; width: 60px; height: 60px; border-radius: 50%;
                 background: #4C97FF; color: #fff; font-size: 34px; display: flex; align-items: center; justify-content: center; }
       .optsub { font-size: 28px; color: #888; }
-      .tick { width: 34px; height: 20px; border-left: 8px solid #35C46B; border-bottom: 8px solid #35C46B;
-              transform: rotate(-45deg); margin-top: -8px; }
+      .tick, .cross { width: 56px; height: 56px; flex: none; background: center/contain no-repeat; }
+      .tick { background-image: url('assets/doodles/tick.svg'); }
+      .cross { background-image: url('assets/doodles/cross.svg'); }
       .cdring { width: 132px; height: 132px; border-radius: 50%; border: 12px solid #FFB703; background: rgba(255,255,255,.92);
                 display: flex; align-items: center; justify-content: center; margin-top: 18px; }
       .cdnum { font-size: 62px; font-weight: 900; color: #6B4A00; }

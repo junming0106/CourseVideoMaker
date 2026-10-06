@@ -56,7 +56,7 @@ const voices = [];  // 有人聲的區段
 for (const s of SEGS) {
   let cur = LEAD;
   for (const l of s.lines) {
-    const d = r2((vd[l.who]?.[voiceId(l.text)] ?? 3) + PAD);
+    const d = r2((vd[l.who]?.[voiceId(l.text, l)] ?? 3) + PAD);
     const start = r2(t + cur), end = r2(start + d);
     if (d >= 3) voices.push(r2(start + 0.3));
     if (l.hold >= 5 && !s.quiz) holes.push({ at: r2(end + 0.8), win: l.hold - 1.5 });

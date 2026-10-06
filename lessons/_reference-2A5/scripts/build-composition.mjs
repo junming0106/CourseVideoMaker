@@ -13,7 +13,7 @@ const CFG = JSON.parse(readFileSync(new URL('course.json', import.meta.url), 'ut
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-// 角色配音（voai TTS）。有配音的角色用實際語音長度排時間，沒有的維持字數估算。
+// 角色配音（Gemini TTS）。有配音的角色用實際語音長度排時間，沒有的維持字數估算。
 const VOICE_DIR = CFG.voiceDir;
 const voiceDur = {};
 for (const who of ['Cooper', 'Max', 'Cora']) {
@@ -63,7 +63,7 @@ const SPRITE = {
   tree: sp('232_Trees', '01_trees-a.svg'),
   bread: sp('029_Bread', '01_bread.svg'),
   bell: sp('025_Bell', '01_bell1.svg'),
-  star: sp('217_Star', '01_star.svg'),
+  star: 'assets/doodles/star.svg',
   flag: sp('114_Green_Flag', '01_green_flag.svg'),
   stop: sp('219_Stop', '01_stop.svg'),
   balloon: sp('015_Balloon1', '01_balloon1-a.svg'),
@@ -236,7 +236,7 @@ for (const seg of SEGS) {
   seg.start = r2(t);
   let cur = LEAD;
   seg.L = seg.lines.map((ln, i) => {
-    const key = voiceId(ln.text);
+    const key = voiceId(ln.text, ln);
     const vd = voiceDur[ln.who]?.[key];
     const d = vd ? r2(vd + VOICE_PAD) : durOf(ln.text);
     const o = { ...ln, rel: r2(cur), dur: d, voice: vd ? `${VOICE_DIR}/${ln.who}/${key}.m4a` : null };
@@ -1069,8 +1069,9 @@ const CSS = `
                  background: #C68B4E; border-radius: 6px; }
       .ico-crate::after { content: ""; position: absolute; left: 2px; top: 14px; width: 82px; height: 18px;
                  background: #A9713B; border-radius: 6px; }
-      .tick { width: 34px; height: 20px; border-left: 8px solid #35C46B; border-bottom: 8px solid #35C46B;
-              transform: rotate(-45deg); margin-top: -8px; }
+      .tick, .cross { width: 56px; height: 56px; flex: none; background: center/contain no-repeat; }
+      .tick { background-image: url('assets/doodles/tick.svg'); }
+      .cross { background-image: url('assets/doodles/cross.svg'); }
 
       .diamond { width: 470px; height: 136px; background: #FFB703; display: flex; align-items: center; justify-content: center;
                  border-radius: 18px; box-shadow: 0 8px 0 rgba(0,0,0,.18); }

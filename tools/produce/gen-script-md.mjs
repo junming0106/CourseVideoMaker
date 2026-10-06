@@ -43,11 +43,12 @@ for (const seg of SEGS) {
   out.push(`### ${seg.vis.startsWith('code') ? '★ ' : ''}${seg.title}`, '');
   out.push(`畫面：\`${seg.vis}\`${seg.teach ? '（統一教室背景）' : ''}`);
   for (const ln of seg.lines) {
-    const d = voiceDur[ln.who]?.[voiceId(ln.text)];
+    const d = voiceDur[ln.who]?.[voiceId(ln.text, ln)];
     const tags = [d ? `${d.toFixed(2)}s` : '無配音', ln.hold ? `停頓 ${ln.hold}s` : null].filter(Boolean);
     out.push(`- **${ln.who}**（${ln.action}）：「${ln.text}」　\`${tags.join('・')}\``);
     // 字幕與送 TTS 的文字不同時要標出來，方便校對唸法
     if (speechText(ln.text) !== ln.text) out.push(`  - 配音唸法：${speechText(ln.text)}`);
+    if (ln.tone || ln.lead) out.push(`  - 配音語氣：${[ln.tone, ln.lead].filter(Boolean).join(' ')}`);
   }
   out.push('');
 }
